@@ -1,10 +1,14 @@
 package com.amineBella.demo.controller;
 
-import ch.qos.logback.core.net.SyslogOutputStream;
 import com.amineBella.demo.entities.User;
 import com.amineBella.demo.service.ExportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,9 +27,17 @@ public class HelloController {
     }
 
     @GetMapping("/export")
-    public InputStreamResource export() {
-        return this.exportService.export();
+    public ResponseEntity<Resource> exportConnections() {
+        try {
+            InputStreamResource response = exportService.export();
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=".concat("users").concat(".xlsx"))
+                    .contentType(MediaType.APPLICATION_OCTET_STREAM).body(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
+
 
     @GetMapping("/hello")
     public String hello() {
